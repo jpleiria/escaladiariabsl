@@ -232,7 +232,7 @@
         }
 
         function addModulo(type) {
-            const m = { type, titulo: type === 'equipa' ? 'Viatura' : (type === 'mobilizacao' ? 'Mobilização' : 'Trocas de Serviço') };
+            const m = { type, titulo: type === 'equipa' ? 'Equipa 1' : (type === 'mobilizacao' ? 'Mobilização' : 'Trocas de Serviço') };
             if(type === 'troca') { 
                 m.linhas = [{ sai: {num:"", nome:""}, entra: {num:"", nome:""} }]; 
             } else {
