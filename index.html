@@ -27,6 +27,8 @@
         .print-header #logoImg { width: 64px; height: 64px; object-fit: contain; justify-self: center; }
         .print-castle { width: 160px; height: 68px; object-fit: contain; object-position: right center; }
         .print-date { white-space: nowrap; }
+        .date-selector { position: relative; }
+        .date-selector-label { position: absolute; inset: 0 auto 0 0.75rem; display: flex; align-items: center; pointer-events: none; color: #64748b; font-size: 0.875rem; }
         
         .drag-handle { cursor: move; user-select: none; }
         .dragging { opacity: 0.5; }
@@ -62,7 +64,10 @@
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="date" id="dataEscala" onchange="updatePreview()" class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-red-500 outline-none">
+                    <div class="date-selector">
+                        <input type="date" id="dataEscala" onchange="updatePreview()" class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-red-500 outline-none">
+                        <span id="dataEscalaLabel" class="date-selector-label">Data</span>
+                    </div>
                     <select id="piquete" onchange="updatePreview()" class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-red-500 outline-none">
                         <option value="">Piquete...</option>
                         <option value="Piquete 1">Piquete 1</option><option value="Piquete 2">Piquete 2</option>
@@ -325,7 +330,10 @@
             document.getElementById('pChefeNome').textContent = escalaData.chefe.nome;
             document.getElementById('pPiquete').textContent = document.getElementById('piquete').value;
             const d = document.getElementById('dataEscala').value;
-            if(d) document.getElementById('pData').textContent = new Date(d).toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
+            document.getElementById('pData').textContent = d
+                ? new Date(d).toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase()
+                : '';
+            document.getElementById('dataEscalaLabel').classList.toggle('hidden', Boolean(d));
             
             const n = document.getElementById('notasInput').value;
             document.getElementById('pNotasBox').className = n ? "mt-6 border-2 border-slate-800 rounded" : "hidden";
