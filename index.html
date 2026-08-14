@@ -27,8 +27,12 @@
         .print-header #logoImg { width: 64px; height: 64px; object-fit: contain; justify-self: center; }
         .print-castle { width: 160px; height: 68px; object-fit: contain; object-position: right center; }
         .print-date { white-space: nowrap; }
-        .date-selector { position: relative; }
-        .date-selector-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; color: #64748b; font-size: 0.875rem; }
+        .date-selector { position: relative; height: 42px; border: 1px solid #d1d5db; border-radius: 0.5rem; background: white; }
+        .date-selector:focus-within { box-shadow: 0 0 0 2px #ef4444; border-color: #ef4444; }
+        .date-selector::after { content: '⌄'; position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); pointer-events: none; color: #64748b; font-size: 1.1rem; }
+        .date-selector input { position: absolute; inset: 0; z-index: 2; opacity: 0; cursor: pointer; }
+        .date-selector-label, .date-selector-value { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; color: #64748b; font-size: 1rem; }
+        .date-selector-value { color: #0f172a; }
         
         .drag-handle { cursor: move; user-select: none; }
         .dragging { opacity: 0.5; }
@@ -54,7 +58,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 bg-slate-50 p-6 rounded-xl border border-slate-200">
                 <div class="space-y-2">
-                    <label class="text-xs font-bold text-slate-500 uppercase tracking-widest">Chefe de Serviço de Prevenção:</label>
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-widest">Chefe de Serviço:</label>
                     <div class="flex gap-2 relative">
                         <input type="text" id="chefeNum" placeholder="Nº" class="w-20 border rounded-lg p-2 font-bold focus:ring-2 focus:ring-red-500 outline-none" oninput="pesquisarGlobal(this, 'chefe', 'num')">
                         <div class="flex-1 relative">
@@ -63,10 +67,11 @@
                         </div>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-4 md:self-end">
                     <div class="date-selector">
-                        <input type="date" id="dataEscala" onchange="updatePreview()" class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-red-500 outline-none">
+                        <input type="date" id="dataEscala" onchange="updatePreview()" onclick="abrirCalendario(this)" class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-red-500 outline-none">
                         <span id="dataEscalaLabel" class="date-selector-label">Data</span>
+                        <span id="dataEscalaValue" class="date-selector-value hidden"></span>
                     </div>
                     <select id="piquete" onchange="updatePreview()" class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-red-500 outline-none">
                         <option value="">Piquete...</option>
@@ -74,6 +79,7 @@
                         <option value="Piquete 3">Piquete 3</option><option value="Piquete 4">Piquete 4</option>
                         <option value="Piquete 5">Piquete 5</option>
                     </select>
+                    <p id="avisoDataPassada" class="hidden col-span-2 text-xs font-semibold text-amber-700">A data selecionada já passou.</p>
                 </div>
             </div>
 
@@ -333,7 +339,14 @@
             document.getElementById('pData').textContent = d
                 ? new Date(d).toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase()
                 : '';
-            document.getElementById('dataEscalaLabel').classList.toggle('hidden', Boolean(d));
+            const dataEscalaLabel = document.getElementById('dataEscalaLabel');
+            const dataEscalaValue = document.getElementById('dataEscalaValue');
+            dataEscalaLabel.classList.toggle('hidden', Boolean(d));
+            dataEscalaValue.classList.toggle('hidden', !d);
+            dataEscalaValue.textContent = d ? new Date(`${d}T00:00:00`).toLocaleDateString('pt-PT') : '';
+            const hoje = new Date();
+            const hojeISO = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+            document.getElementById('avisoDataPassada').classList.toggle('hidden', !d || d >= hojeISO);
             
             const n = document.getElementById('notasInput').value;
             document.getElementById('pNotasBox').className = n ? "mt-6 border-2 border-slate-800 rounded" : "hidden";
@@ -365,6 +378,12 @@
                             </div>`).join('')}
                     </div>
                 </div>`).join('');
+        }
+
+        function abrirCalendario(input) {
+            if (typeof input.showPicker === 'function') {
+                try { input.showPicker(); } catch (e) { /* O navegador usa o seletor nativo como alternativa. */ }
+            }
         }
 
         async function exportarJPG() {
